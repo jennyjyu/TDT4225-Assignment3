@@ -172,11 +172,12 @@ class Program:
         return i + 1   
 
     def run_queries(self):
-        #queries.NumberOfUsersActivitiesTrackpoints(self)
-        queries.AverageNumberOfActivities(self)    
+        #queries.NumberOfUsersActivitiesTrackpoints(self) 
+        #queries.AverageNumberOfActivities(self) 
+        #queries.TopNUsersMostActivities(self,20)  
         #queries.UsersTakeTaxi(self)  
-        #queries.TypesAndAmountofTransportationModes(self)       
-
+        queries.TypesAndAmountofTransportationModes(self)
+              
 def main():
     program = None
     try:
