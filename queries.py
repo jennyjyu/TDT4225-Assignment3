@@ -39,9 +39,16 @@ def AverageNumberOfActivities(program):
 def TopNUsersMostActivities(program, n):
     activity_collection = program.db.Activity
     topNUsers = activity_collection.aggregate([
-    { '$group': { 'user': "$Activity", 'count': { '$sum': 1 } } },
-    { '$sort': { 'count': -1 } }
+    { '$group': { '_id': "$user", 'count': { '$sum': 1 } } },
+    { '$sort': { 'count': -1 } },
+    { '$limit' : n }
   ])
+
+    for count in topNUsers:
+        print("User:    " + str(count['_id']) + "    |     "
+              "# of activities:  " + str(count['count']) + ".")
+
+         
     
 
 """
