@@ -70,9 +70,12 @@ def TypesAndAmountofTransportationModes(program):
     transportation_modes = activity_collection.find({'transportation_mode': { '$not': re.compile('-') }}, {'transportation_mode': 1}).distinct("transportation_mode")
 
     mode_count = activity_collection.aggregate([{'$group': { '_id': '$transportation_mode', 'count': {'$sum': 1}}}]) 
-
-    print("Transportation modes", transportation_modes)
     print("Count pr mode: ", mode_count)
+    for mode in mode_count:
+        print(mode)
+
+    # print("Transportation modes", transportation_modes)
+    
 
 
 """
