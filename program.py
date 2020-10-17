@@ -1,6 +1,7 @@
 from pprint import pprint 
 from DbConnector import DbConnector
 import os
+import queries
 
 
 
@@ -168,27 +169,34 @@ class Program:
         with open(file) as f:
             for i, l in enumerate(f):
                 pass
-        return i + 1                    
+        return i + 1   
 
+    def run_queries(self):
+        #queries.NumberOfUsersActivitiesTrackpoints(self)
+        queries.AverageNumberOfActivities(self)    
+        #queries.UsersTakeTaxi(self)  
+        #queries.TypesAndAmountofTransportationModes(self)       
 
 def main():
     program = None
     try:
         program = Program()
-        
-        #Drop collections (if exists?)
-        program.drop_coll(collection_name='User')
-        program.drop_coll(collection_name='Activity')
-        program.drop_coll(collection_name='TrackPoint')
-        program.drop_coll(collection_name='Trackpoint')
 
-        program.create_coll(collection_name="User")
-        program.create_coll(collection_name="Activity")
-        program.create_coll(collection_name="TrackPoint")
-        program.show_coll()
+        #Drop collections 
+        #program.drop_coll(collection_name='User')
+        #program.drop_coll(collection_name='Activity')
+        #program.drop_coll(collection_name='TrackPoint')
+        #program.drop_coll(collection_name='Trackpoint')
 
-        program.insert_data()
+        #program.create_coll(collection_name="User")
+        #program.create_coll(collection_name="Activity")
+        #program.create_coll(collection_name="TrackPoint")
+        #program.show_coll()
+
+        #program.insert_data()
         
+        program.run_queries()
+
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
