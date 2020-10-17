@@ -9,6 +9,8 @@ class ExampleProgram:
         self.client = self.connection.client
         self.db = self.connection.db
 
+        
+
     def create_coll(self, collection_name):
         collection = self.db.create_collection(collection_name)    
         print('Created collection: ', collection)
