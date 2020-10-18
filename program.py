@@ -173,9 +173,12 @@ class Program:
 
     def run_queries(self):
         #queries.NumberOfUsersActivitiesTrackpoints(self)
-        queries.AverageNumberOfActivities(self)    
+        #queries.AverageNumberOfActivities(self)
         #queries.UsersTakeTaxi(self)  
-        #queries.TypesAndAmountofTransportationModes(self)       
+        #queries.TypesAndAmountofTransportationModes(self)
+        # queries.YearMostActivities(self)
+        queries.YearMostRecordedHours(self)
+        #queries.DistanceWalked(self, None, None)
 
 def main():
     program = None

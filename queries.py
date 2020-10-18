@@ -1,4 +1,5 @@
 import re
+from haversine import haversine
 
 
 """
@@ -67,15 +68,11 @@ def UsersTakeTaxi(program):
 """
 def TypesAndAmountofTransportationModes(program):
     activity_collection = program.db.Activity
-    transportation_modes = activity_collection.find({'transportation_mode': { '$not': re.compile('-') }}, {'transportation_mode': 1}).distinct("transportation_mode")
 
-    mode_count = activity_collection.aggregate([{'$group': { '_id': '$transportation_mode', 'count': {'$sum': 1}}}]) 
-    print("Count pr mode: ", mode_count)
+    mode_count = activity_collection.aggregate([{'$match': {'transportation_mode': {'$not': re.compile('-')}}}, {'$group': { '_id': '$transportation_mode', 'count': {'$sum': 1}}}])
+    print("Count pr mode: ")
     for mode in mode_count:
-        print(mode)
-
-    # print("Transportation modes", transportation_modes)
-    
+        print("{}: {}".format(mode['_id'], mode['count']))
 
 
 """
@@ -83,18 +80,49 @@ def TypesAndAmountofTransportationModes(program):
     b) Is this also the year with most recorded hours?
 """
 def YearMostActivities(program):
-    pass
+    trackpoint_collection = program.db.TrackPoint
+    activities_by_year = trackpoint_collection.aggregate(
+        [{'$group': {'_id': {'year': {'$substr': ['$date_time', 0, 4]}, 'activity_id': '$activity_id'}}}, {'$group': {'_id': '$_id.year', 'count': {'$sum': 1}}}])
+    print(activities_by_year)
+    for year in activities_by_year:
+        print("{}: {}".format(year['_id'], year['count']))
+
 
 def YearMostRecordedHours(program):
-    pass
+    activity_collection = program.db.Activity
+    hours_by_year = activity_collection.aggregate(
+        [{'$group': {'_id': {'year': {'$substr': ['$start_date_time', 0, 4]}}, 'count': {'$sum': {'$divide': [{'$subtract': [{'$toDate': '$end_date_time'}, {'$toDate': '$start_date_time'}]}, 60 * 1000 * 60]}}}}, {'$sort': {'count': -1}}]
+    )
+    for line in hours_by_year:
+        print("The year with the most acitivites was {}, with {} hours".format(line['_id']['year'], int(line['count'])))
+        break
 
 
 """
 7. Find the total distance (in km) ​walked​ in 2008, by user with id=112.
 """
 def DistanceWalked(program, year, user):
-    pass
+    activity_collection = program.db.Activity
+    activites_from_112 = list(activity_collection.find({'user': '112'}, {'_id': 1}))
+    activites_from_112 = [i['_id'] for i in activites_from_112]
+    trackpoint_collection = program.db.TrackPoint
+    trackpoints_112 = trackpoint_collection.find(
+        {'date_time': re.compile('^(2008)(.*)'), 'activity_id': {'$in': activites_from_112}}, {'lat': 1, 'lon': 1, 'activity_id': 1})
 
+
+    print("Ferdig her...")
+    tot_dist = 0
+    for i in range(trackpoints_112.count() - 1):
+        print(i)
+        # Check if the trackpoints is in the same activity
+        if (trackpoints_112[i]['activity_id'] == trackpoints_112[i + 1]['activity_id']):
+            # Haversine calculate distance between latitude longitude pairs
+            from_tuple = (trackpoints_112[i]['lat'], trackpoints_112[i]['lon'])
+            to_tuple = (trackpoints_112[i+i]['lat'], trackpoints_112[i+1]['lon'])
+            dist = haversine(from_tuple, to_tuple)
+            tot_dist += dist
+
+    print("Total distance walked by user 112 in 2008: ", tot_dist)
 
 
 """
