@@ -176,7 +176,7 @@ class Program:
         # queries.TypesAndAmountofTransportationModes(self)
         # queries.YearMostActivities(self)
         # queries.YearMostRecordedHours(self)
-        # queries.DistanceWalked(self, None, None)
+        # queries.DistanceWalked(self)
         # queries.TopNUsersMostAltitude(self, 20)
         # queries.UsersAmountOfInvalidActivities(self)
         # queries.UsersActivityWithCoordinates(self)
