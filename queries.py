@@ -1,6 +1,7 @@
 import re
-from haversine import haversine
 
+from haversine import haversine
+from tqdm import tqdm
 
 """
 1. How many users, activities and trackpoints are there in the dataset
@@ -128,7 +129,63 @@ def YearMostRecordedHours(program):
 """
 
 
-def DistanceWalked(program, year, user):
+def DistanceWalked(program):
+
+    lat_lon_2008_112 = program.db.TrackPoint.aggregate([
+        {'$project': {
+            '_id': 1,
+            'activity_id': 1,
+            'lat': 1,
+            'lon': 1,
+            'year': {'$substr': ['$date_time', 0, 4]}
+        }},
+        {'$match': {'year': {'$eq': '2008'}}},
+        {'$lookup': {
+            'localField': 'activity_id',
+            'from': 'Activity',
+            'foreignField': '_id',
+            'as': 'activityInfo'
+        }},
+        {'$project': {
+            '_id': 0,
+            'activity_id': 1,
+            'activityInfo.user': 1,
+            'lat': 1,
+            'lon': 1,
+            'year': 1
+        }},
+        {'$match': {'activityInfo.user': '112'}}
+    ], allowDiskUse=True)
+
+    tot_dist = 0
+    for i, doc in enumerate(lat_lon_2008_112):
+        activity_id = doc['activity_id']
+        lat = doc['lat']
+        lon = doc['lon']
+        try:
+            next_doc = lat_lon_2008_112.next()
+        except Exception as e:
+            pass
+
+        # Check if the trackpoints is in the same activity
+        if (activity_id == next_doc['activity_id']):
+            # Haversine calculate distance between latitude longitude pairs
+            from_tuple = (lat, lon)
+            to_tuple = (next_doc['lat'],
+                        next_doc['lon'])
+            dist = haversine(from_tuple, to_tuple)
+            tot_dist += dist
+
+    print("Total distance walked by user 112 in 2008: ", tot_dist)
+
+
+"""
+   
+"""
+
+
+"""
+
     activity_collection = program.db.Activity
     activites_from_112 = list(
         activity_collection.find({'user': '112'}, {'_id': 1}))
@@ -149,7 +206,7 @@ def DistanceWalked(program, year, user):
             tot_dist += dist
 
     print("Total distance walked by user 112 in 2008: ", tot_dist)
-
+"""
 
 """
 8. Find the top 20 users who have gained the most altitude ​meters​.
@@ -162,48 +219,56 @@ def DistanceWalked(program, year, user):
 def TopNUsersMostAltitude(program, n):
 
     users_altitudes = program.db.TrackPoint.aggregate([
+        {'$project': {
+            '_id': 0,
+            'activity_id': 1,
+            'altitude': 1
+        }},
         {'$match': {'altitude': {'$gt': 0}}},
-        {'$lookup': {'localField': 'activity_id',
-                     'from': 'Activity',
-                     'foreignField': '_id',
-                     'as': 'activityInfo'
-                     }},
-        {'$unwind': '$activityInfo'},
-        {'$project': {'_id': 0,
-                      'altitude': 1,
-                      'activityInfo.user': 1
-                      }},
-    ], allowDiskUse=True)
+        {'$lookup': {
+            'localField': 'activity_id',
+            'from': 'Activity',
+            'foreignField': '_id',
+            'as': 'activityInfo'
+        }},
+        {'$project': {
+            '_id': 0,
+            'activityInfo.user': 1,
+            'altitude': 1
+        }}], allowDiskUse=True)
 
     # output: [{'altitude': 291.0, 'activityInfo': {'user': '000'}}]
 
-    print('DONE')
+    user_total_altitude = {}
 
-    user_totol_altitude = {}
+    for user_alt in tqdm(users_altitudes):
 
-    for user_alt in users_altitudes:
-
-        user = user_alt['activityInfo']['user']
+        user = user_alt['activityInfo'][0]['user']
         altitude = user_alt['altitude']
 
-        if user in user_totol_altitude.keys():
-            comp_altitude = user_totol_altitude[user][1]
+        if user in user_total_altitude.keys():
+            comp_altitude = user_total_altitude[user][1]
             if altitude > comp_altitude:
-                old_total = user_totol_altitude[user][0]
+                old_total = user_total_altitude[user][0]
                 new_total = old_total + (altitude-comp_altitude)
-                user_totol_altitude[user][0] = new_total
-            user_totol_altitude[user][1] = altitude
+                user_total_altitude[user][0] = new_total
+            user_total_altitude[user][1] = altitude
 
         else:
-            user_totol_altitude[user] = [0, altitude]
+            user_total_altitude[user] = [0, altitude]
 
-    sorted_user_total_altitude = {k: v for k, v in sorted(
-        user_totol_altitude.items(), key=lambda item: item[1][0])}
-    top_20 = sorted_user_total_altitude[:20]
+    # {user: [53126, 464]}, user2:...
+
+    sorted_dict = sorted(user_total_altitude.items(),
+                         key=lambda x: x[1][0])
+    top_20 = sorted_dict[-20:]
+
+    top_20.reverse()
+
     print('********** USERS WITH THE MOST GAINED ALTITUDES **********' + '\n')
-    for user in top_20.keys():
-        print('User: ' + str(user) + ' with altitude: ' +
-              str(top_20[user][0]))
+    for user in top_20:
+        print('User: ' + str(user[0]) + ' with altitude: ' +
+              str(user[1][0]))
 
 
 """
@@ -297,9 +362,7 @@ def UsersActivityWithCoordinates(program):
         }},
         {'$group': {
             '_id': '$activityInfo.user'
-        }
-        },
-    ], allowDiskUse=True)
+        }}], allowDiskUse=True)
 
     activities_forbidden_city = []
 
