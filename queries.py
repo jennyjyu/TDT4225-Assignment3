@@ -25,24 +25,17 @@ def NumberOfUsersActivitiesTrackpoints(program):
 """
 
 def AverageNumberOfActivities(program):
-    user_collection = program.db.User
-    users = user_collection.find({})
 
     activity_collection = program.db.Activity
     activities = activity_collection.find({}, {'user':1})
 
-    per_user = {}
-    for user in users:
-        if user in activities:
-            per_user[user] = 0
-
-    for activity
+    users =  []
+    for activity in activities:
+        if activity['user'] not in users:
+            users.append(activity['user'])
 
 
-
-    #join on user_id
-    #count gorup by user_id
-    
+    print("The average number of activities per user is " + str(activities.count()/len(users)))
 
 
 
