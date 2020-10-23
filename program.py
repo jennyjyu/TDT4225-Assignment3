@@ -1,7 +1,6 @@
 from pprint import pprint 
 from DbConnector import DbConnector
 import os
-import queries
 
 
 
@@ -18,8 +17,7 @@ class Program:
         self.subfolders.sort()
         self.ids = tuple(self.subfolders)
         # Set of all users that are labeled
-        self.labeled = set(self.file_reader("dataset/labeled_ids.txt", False, None))
-        #self.long_files = {}
+        self.labeled = set(self.file_reader("dataset/labeled_ids.txt", False))
 
     def create_coll(self, collection_name):
         collection = self.db.create_collection(collection_name)    
@@ -42,23 +40,12 @@ class Program:
         print(collections)
 
    
-    def file_reader(self, filepath, read_trajectory, user_id):
+    def file_reader(self, filepath, read_trajectory):
         f = open(filepath, "r")
         file = []
-        long_filenames = set()
         if read_trajectory: #Getting the values if it is a trajectory
-            '''i = -6'''
             for line in f:
                 file.append(line.strip())
-                '''i+=1
-                if i > 2500: # Checking if file is too long
-                    if user_id in self.long_files:
-                        self.long_files[user_id].add(filepath[-18:])
-                    else:
-                        long_filenames.add(filepath[-18:])
-                        self.long_files[user_id] = long_filenames
-                    f.close()
-                    return None, None'''
             f.close()
             first_point = file[6].strip()
             last_point = file[-1]
@@ -74,7 +61,7 @@ class Program:
 
 
     def read_labels(self, filepath):
-        file = self.file_reader(filepath, False, None)
+        file = self.file_reader(filepath, False)
         dict = {} # start_time : transportation_mode
         for line in file:
             transportation_mode = line[40:].strip()
@@ -138,7 +125,7 @@ class Program:
                     # Ignoring .-files, labels.txt and files with more than 2500 trackpoints
                     if not file.startswith('.') and file != 'labels.txt' and self.count_lines(os.path.join(root, file)) < 2506:
                         # Saving data
-                        start_date_time, end_date_time = self.file_reader(os.path.join(root, file), True, id)
+                        start_date_time, end_date_time = self.file_reader(os.path.join(root, file), True)
                         if labeled:
                             labels = self.read_labels('dataset/Data/' + id + '/labels.txt')
                             if start_date_time in labels:
@@ -169,20 +156,20 @@ class Program:
         with open(file) as f:
             for i, l in enumerate(f):
                 pass
-        return i + 1   
+        return i + 1                    
 
     def run_queries(self):
         #queries.NumberOfUsersActivitiesTrackpoints(self)
-        queries.AverageNumberOfActivities(self)    
-        #queries.UsersTakeTaxi(self)  
-        #queries.TypesAndAmountofTransportationModes(self)       
+        #queries.AverageNumberOfActivities(self)
+        #queries.UsersTakeTaxi(self)
+        #queries.TypesAndAmountofTransportationModes(self)
 
 def main():
     program = None
     try:
         program = Program()
-
-        #Drop collections 
+        
+        #Drop collections
         #program.drop_coll(collection_name='User')
         #program.drop_coll(collection_name='Activity')
         #program.drop_coll(collection_name='TrackPoint')
