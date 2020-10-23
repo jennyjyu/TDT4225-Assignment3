@@ -180,7 +180,7 @@ class Program:
         # queries.TopNUsersMostAltitude(self, 20)
         # queries.UsersAmountOfInvalidActivities(self)
         # queries.UsersActivityWithCoordinates(self)
-        queries.UsersMostUsedTransportationMode(self)
+        # queries.UsersMostUsedTransportationMode(self)
 
 
 def main():
