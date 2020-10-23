@@ -158,13 +158,18 @@ class Program:
                 pass
         return i + 1                    
 
+    def run_queries(self):
+        #queries.NumberOfUsersActivitiesTrackpoints(self)
+        #queries.AverageNumberOfActivities(self)
+        #queries.UsersTakeTaxi(self)
+        #queries.TypesAndAmountofTransportationModes(self)
 
 def main():
     program = None
     try:
         program = Program()
         
-        #Drop collections (if exists?)
+        #Drop collections
         #program.drop_coll(collection_name='User')
         #program.drop_coll(collection_name='Activity')
         #program.drop_coll(collection_name='TrackPoint')
@@ -177,6 +182,8 @@ def main():
 
         #program.insert_data()
         
+        program.run_queries()
+
     except Exception as e:
         print("ERROR: Failed to use database:", e)
     finally:
