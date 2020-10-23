@@ -181,6 +181,7 @@ class Program:
         # queries.UsersAmountOfInvalidActivities(self)
         # queries.UsersActivityWithCoordinates(self)
         # queries.UsersMostUsedTransportationMode(self)
+        pass
 
 
 def main():
